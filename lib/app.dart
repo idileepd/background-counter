@@ -24,13 +24,14 @@ class _MyAppState extends State<MyApp> {
     await stopService();
   }
 
-  void pauseResumeService() async {
+  void pauseService() async {
     bool isRunning =
         await FlutterForegroundServicePlugin.isForegroundServiceRunning();
+    print("Status: $isRunning");
     if (isRunning)
-      await stopTask();
+      await stopService();
     else
-      await startTask();
+      await stopService();
   }
 
   void resetCounter() async {
@@ -39,22 +40,22 @@ class _MyAppState extends State<MyApp> {
     //start service
     await stopTask();
     await stopService();
-    await box.write('store', 1);
+    await box.write('store', 0);
   }
 
   Future<void> startService() async {
     await FlutterForegroundServicePlugin.startForegroundService(
       notificationContent: NotificationContent(
         iconName: 'ic_launcher',
-        titleText: 'TASCO',
+        titleText: 'Task Tracking',
         color: Colors.red,
         subText: 'status',
       ),
       notificationChannelContent: NotificationChannelContent(
-        id: 'some_id',
-        nameText: 'settings title',
-        descriptionText: 'settings description text',
-        lockscreenVisibility: NotificationChannelLockscreenVisibility.public,
+        id: 'counting_id',
+        nameText: 'Task Tracking',
+        descriptionText: 'Task Tracking',
+        // lockscreenVisibility: NotificationChannelLockscreenVisibility.public,
       ),
     );
   }
@@ -83,6 +84,15 @@ class _MyAppState extends State<MyApp> {
       duration: Duration(milliseconds: 500),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    print("INIT");
+    box.listenKey('store', (value) {
+      print('new key is $value');
+    });
   }
 
   @override
@@ -131,7 +141,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                   TextButton(
                     child: Text('pasuse resume'),
-                    onPressed: pauseResumeService,
+                    onPressed: pauseService,
                   ),
                 ],
               ),
