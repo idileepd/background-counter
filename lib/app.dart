@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_service_plugin/flutter_foreground_service_plugin.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:ntp/ntp.dart';
 
 class MyApp extends StatefulWidget {
   final void Function() periodicFuction;
@@ -15,6 +16,9 @@ class _MyAppState extends State<MyApp> {
   final box = GetStorage();
 
   void startCounting() async {
+    DateTime startDate = await NTP.now();
+    await box.write('ntpStartDate', startDate.millisecondsSinceEpoch);
+    await box.write('startDate', DateTime.now().millisecondsSinceEpoch);
     await startService();
     await startTask();
   }
@@ -38,9 +42,15 @@ class _MyAppState extends State<MyApp> {
     //stop service
     //clear storage
     //start service
-    await stopTask();
-    await stopService();
-    await box.write('store', 0);
+    bool isRunning =
+        await FlutterForegroundServicePlugin.isForegroundServiceRunning();
+    if (isRunning) {
+      await stopTask();
+      await stopService();
+      // await box.write('store', 0);
+      await box.write('ntpStartDate', null);
+      await box.write('startDate', null);
+    }
   }
 
   Future<void> startService() async {
@@ -61,7 +71,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> stopService() async {
-    await FlutterForegroundServicePlugin.stopForegroundService();
+    bool isRunning =
+        await FlutterForegroundServicePlugin.isForegroundServiceRunning();
+    if (isRunning) await FlutterForegroundServicePlugin.stopForegroundService();
   }
 
   Future<void> startTask() async {
@@ -72,11 +84,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> stopTask() async {
-    await FlutterForegroundServicePlugin.stopPeriodicTask();
+    bool isRunning =
+        await FlutterForegroundServicePlugin.isForegroundServiceRunning();
+    if (isRunning) await FlutterForegroundServicePlugin.stopPeriodicTask();
   }
 
   void checkServiceStatus() async {
-    var isRunning =
+    bool isRunning =
         await FlutterForegroundServicePlugin.isForegroundServiceRunning();
     print(isRunning);
     var snackbar = SnackBar(
@@ -90,9 +104,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     print("INIT");
-    box.listenKey('store', (value) {
-      print('new key is $value');
-    });
+    // box.listenKey('store', (value) {
+    //   print('new key is $value');
+    // });
   }
 
   @override

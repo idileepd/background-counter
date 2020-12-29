@@ -20,14 +20,20 @@ String printDuration(Duration duration) {
 void periodicTaskFun() {
   final box = GetStorage();
   FlutterForegroundServicePlugin.executeTask(() async {
-    int seconds = box.read('store') ?? 0;
+    int startDateMilliseconds =
+        box.read('startDate') ?? DateTime.now().millisecondsSinceEpoch;
+    DateTime startDate =
+        DateTime.fromMillisecondsSinceEpoch(startDateMilliseconds);
     // print("Refershed task: $seconds");
-    int incSeconds = seconds + 1;
-    await box.write('store', incSeconds);
+    // int incSeconds = seconds + 1;
+    // await box.write('store', incSeconds);
+    // DateTime.fromMillisecondsSinceEpoch();
+    // ;
     // this will refresh the notification content each time the task is fire
     // if you want to refresh the notification content too each time
     // so don't set a low period duration because android isn't handling it very well
-    String duration = printDuration(Duration(seconds: incSeconds));
+    String duration = printDuration(
+        Duration(seconds: DateTime.now().difference(startDate).inSeconds));
     await FlutterForegroundServicePlugin.refreshForegroundServiceContent(
       notificationContent: NotificationContent(
         iconName: 'ic_launcher',
