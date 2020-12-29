@@ -1,8 +1,7 @@
 import 'package:bgc/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_service_plugin/flutter_foreground_service_plugin.dart';
-// import 'package:get_storage/get_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 
 String printDuration(Duration duration) {
   String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -19,16 +18,12 @@ String printDuration(Duration duration) {
 }
 
 void periodicTaskFun() {
-  // final box = GetStorage();
+  final box = GetStorage();
   FlutterForegroundServicePlugin.executeTask(() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    // int seconds = box.read('store') ?? 0;
-    int seconds = _prefs.getInt('store') ?? 0;
+    int seconds = box.read('store') ?? 0;
     // print("Refershed task: $seconds");
     int incSeconds = seconds + 1;
-    // await box.write('store', incSeconds);
-    bool status = await _prefs.setInt('store', incSeconds);
-    print("Set status: $status  val:$incSeconds");
+    await box.write('store', incSeconds);
     // this will refresh the notification content each time the task is fire
     // if you want to refresh the notification content too each time
     // so don't set a low period duration because android isn't handling it very well
@@ -36,9 +31,9 @@ void periodicTaskFun() {
     await FlutterForegroundServicePlugin.refreshForegroundServiceContent(
       notificationContent: NotificationContent(
         iconName: 'ic_launcher',
-        titleText: incSeconds.toString(),
+        titleText: duration,
         bodyText: duration,
-        color: Colors.red,
+        color: Colors.yellow,
         // subText: 'Counting',
         // titleText: 'You are till: ${DateTime.now().second.toString()}',
         // bodyText: 'C:$x',
@@ -52,14 +47,6 @@ void periodicTaskFun() {
 }
 
 void main() async {
-  // await GetStorage.init();
-  WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  try {
-    prefs.getInt('store');
-  } catch (e) {
-    bool status = await prefs.setInt('store', 0);
-    print("Set status: $status  val: 0");
-  }
-  runApp(MyApp(periodicFuction: periodicTaskFun, prefs: prefs));
+  await GetStorage.init();
+  runApp(MyApp(periodicFuction: periodicTaskFun));
 }
