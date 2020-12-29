@@ -26,6 +26,7 @@ dependencies:
   cupertino_icons: ^1.0.1
   flutter_foreground_service_plugin: ^0.1.5
   get_storage: ^1.4.0
+  shared_preferences: ^0.5.12+4
 
 dev_dependencies:
   flutter_test:

@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_service_plugin/flutter_foreground_service_plugin.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyApp extends StatefulWidget {
   final void Function() periodicFuction;
+  final SharedPreferences prefs;
 
-  const MyApp({Key key, @required this.periodicFuction}) : super(key: key);
+  const MyApp({Key key, @required this.periodicFuction, @required this.prefs})
+      : super(key: key);
 
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  final box = GetStorage();
+  // final box = GetStorage();
 
   void startCounting() async {
     await startService();
@@ -40,7 +43,9 @@ class _MyAppState extends State<MyApp> {
     //start service
     await stopTask();
     await stopService();
-    await box.write('store', 0);
+    // await box.write('store', 0);
+    bool status = await widget.prefs.setInt('store', 0);
+    print("Reset to 0 and status : $status  ");
   }
 
   Future<void> startService() async {
@@ -89,10 +94,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    print("INIT");
-    box.listenKey('store', (value) {
-      print('new key is $value');
-    });
   }
 
   @override
